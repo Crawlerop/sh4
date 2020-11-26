@@ -1,0 +1,6 @@
+[submodule "nginx-1.19.4/streams"]
+	path = nginx-1.19.4/streams
+	url = https://github.com/sergey-dryabzhinsky/nginx-rtmp-module.git
+[submodule "nginx-1.19.4/active_health"]
+	path = nginx-1.19.4/active_health
+	url = https://github.com/yaoweibin/nginx_upstream_check_module.git
