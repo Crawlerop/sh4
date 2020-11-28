@@ -10,6 +10,9 @@
 #include <ngx_http.h>
 #include <ngx_http_v2_module.h>
 
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+#include <ngx_autotune_upload.h>
+#endif
 
 static ngx_int_t ngx_http_v2_add_variables(ngx_conf_t *cf);
 
@@ -38,6 +41,10 @@ static char *ngx_http_v2_streams_index_mask(ngx_conf_t *cf, void *post,
 static char *ngx_http_v2_chunk_size(ngx_conf_t *cf, void *post, void *data);
 static char *ngx_http_v2_spdy_deprecated(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+static char *ngx_http_v2_max_client_body_buffer_size(ngx_conf_t *cf, void *post,
+    void *data);
+#endif
 
 
 static ngx_conf_post_t  ngx_http_v2_recv_buffer_size_post =
@@ -50,6 +57,10 @@ static ngx_conf_post_t  ngx_http_v2_streams_index_mask_post =
     { ngx_http_v2_streams_index_mask };
 static ngx_conf_post_t  ngx_http_v2_chunk_size_post =
     { ngx_http_v2_chunk_size };
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+static ngx_conf_post_t  ngx_http_v2_max_client_body_buffer_size_post =
+    { ngx_http_v2_max_client_body_buffer_size };
+#endif
 
 
 static ngx_command_t  ngx_http_v2_commands[] = {
@@ -207,6 +218,15 @@ static ngx_command_t  ngx_http_v2_commands[] = {
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
+
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    { ngx_string("http2_max_client_body_buffer_size"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_size_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_v2_loc_conf_t, max_client_body_buffer_size),
+      &ngx_http_v2_max_client_body_buffer_size_post },
+#endif
 
       ngx_null_command
 };
@@ -423,6 +443,10 @@ ngx_http_v2_create_loc_conf(ngx_conf_t *cf)
     h2lcf->push_preload = NGX_CONF_UNSET;
     h2lcf->push = NGX_CONF_UNSET;
 
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    h2lcf->max_client_body_buffer_size = NGX_CONF_UNSET_SIZE;
+#endif
+
     return h2lcf;
 }
 
@@ -442,6 +466,12 @@ ngx_http_v2_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     }
 
     ngx_conf_merge_value(conf->push_preload, prev->push_preload, 0);
+
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    /* default is 0: no auto tuning */
+    ngx_conf_merge_size_value(conf->max_client_body_buffer_size,
+                              prev->max_client_body_buffer_size, 0);
+#endif
 
     return NGX_CONF_OK;
 }
@@ -608,3 +638,19 @@ ngx_http_v2_spdy_deprecated(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     return NGX_CONF_OK;
 }
+
+
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+static char *
+ngx_http_v2_max_client_body_buffer_size(ngx_conf_t *cf, void *post,
+    void *data)
+{
+    size_t *sp = data;
+
+    if (*sp > NGX_HTTP_V2_MAX_CLIENT_BODY_BUFFER_SIZE) {
+        *sp = NGX_HTTP_V2_MAX_CLIENT_BODY_BUFFER_SIZE;
+    }
+
+    return NGX_CONF_OK;
+}
+#endif

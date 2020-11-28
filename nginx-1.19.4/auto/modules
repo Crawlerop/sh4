@@ -420,6 +420,15 @@ if [ $HTTP = YES ]; then
         ngx_module_libs=
         ngx_module_link=$HTTP_V2
 
+        if [ $HTTP_V2 = YES -a $HTTP_V2_AUTOTUNE_UPLOAD = YES ]; then
+             have=NGX_HTTP_V2_AUTOTUNE_UPLOAD . auto/have
+
+             ngx_module_deps="$ngx_module_deps \
+                             src/http/v2/ngx_autotune_upload.h"
+             ngx_module_srcs="$ngx_module_srcs \
+                             src/http/v2/ngx_autotune_upload.c"
+        fi
+
         . auto/module
     fi
 

@@ -267,6 +267,15 @@ struct ngx_http_v2_stream_s {
 
     ngx_pool_t                      *pool;
 
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    /* how much client request body read */
+    ngx_uint_t                       bytes_body_read;
+    /* timestamp of next checkpoint */
+    ngx_msec_int_t                   ts_checkpoint;
+    /* rtt(ms) of the connection */
+    ngx_int_t                        rtt;
+#endif
+
     unsigned                         waiting:1;
     unsigned                         blocked:1;
     unsigned                         exhausted:1;

@@ -11,6 +11,10 @@
 #include <ngx_http_v2_module.h>
 
 
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+#include <ngx_autotune_upload.h>
+#endif
+
 typedef struct {
     ngx_str_t           name;
     ngx_uint_t          offset;
@@ -1141,6 +1145,10 @@ ngx_http_v2_state_read_data(ngx_http_v2_connection_t *h2c, u_char *pos,
 
     pos += size;
     h2c->state.length -= size;
+
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    stream->bytes_body_read += size;
+#endif
 
     if (h2c->state.length) {
         return ngx_http_v2_state_save(h2c, pos, end,
@@ -3260,6 +3268,12 @@ ngx_http_v2_create_stream(ngx_http_v2_connection_t *h2c, ngx_uint_t push)
 
     h2c->priority_limit += h2scf->concurrent_streams;
 
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    stream->bytes_body_read = 0;
+    stream->rtt = ngx_tcp_rtt_ms(r->connection->fd);
+    stream->ts_checkpoint = ngx_timestamp_ms();
+#endif
+
     return stream;
 }
 
@@ -4371,6 +4385,15 @@ ngx_http_v2_read_unbuffered_request_body(ngx_http_request_t *r)
 
         return NGX_AGAIN;
     }
+
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    window = ngx_autotune_client_body_buffer(r, window);
+
+    /* resizing failed */
+    if (!window) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+#endif
 
     if (ngx_http_v2_send_window_update(h2c, stream->node->id,
                                        window - stream->recv_window)

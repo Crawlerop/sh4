@@ -41,6 +41,10 @@ typedef struct {
 
     ngx_flag_t                      push;
     ngx_array_t                    *pushes;
+
+#if (NGX_HTTP_V2_AUTOTUNE_UPLOAD)
+    size_t                          max_client_body_buffer_size;
+#endif
 } ngx_http_v2_loc_conf_t;
 
 
