@@ -1982,6 +1982,13 @@ ngx_http_process_request_header(ngx_http_request_t *r)
         return NGX_ERROR;
     }
 
+    if (r->method == NGX_HTTP_UNKNOWN) {
+        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
+                      "client sent an unknown method");
+        ngx_http_finalize_request(r, NGX_HTTP_NOT_IMPLEMENTED);
+        return NGX_ERROR; 
+    }
+
     if (r->headers_in.transfer_encoding) {
         if (r->headers_in.transfer_encoding->value.len == 7
             && ngx_strncasecmp(r->headers_in.transfer_encoding->value.data,
@@ -2255,8 +2262,8 @@ ngx_http_set_virtual_server(ngx_http_request_t *r, ngx_str_t *host)
         if (sscf->verify) {
             ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
                           "client attempted to request the server name "
-                          "different from the one that was negotiated");
-            ngx_http_finalize_request(r, NGX_HTTP_MISDIRECTED_REQUEST);
+                          "that has a very different host certificate");
+            ngx_http_finalize_request(r, NGX_HTTP_FORBIDDEN);
             return NGX_ERROR;
         }
     }

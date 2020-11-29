@@ -3565,6 +3565,7 @@ ngx_http_v2_parse_method(ngx_http_request_t *r, ngx_str_t *value)
         { 4, "POST",      NGX_HTTP_POST },
         { 4, "HEAD",      NGX_HTTP_HEAD },
         { 7, "OPTIONS",   NGX_HTTP_OPTIONS },
+        { 7, "CONNECT",   NGX_HTTP_CONNECT },
         { 8, "PROPFIND",  NGX_HTTP_PROPFIND },
         { 3, "PUT",       NGX_HTTP_PUT },
         { 5, "MKCOL",     NGX_HTTP_MKCOL },

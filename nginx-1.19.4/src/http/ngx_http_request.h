@@ -40,6 +40,7 @@
 #define NGX_HTTP_LOCK                      0x1000
 #define NGX_HTTP_UNLOCK                    0x2000
 #define NGX_HTTP_PATCH                     0x4000
+#define NGX_HTTP_CONNECT                   0x6000
 #define NGX_HTTP_TRACE                     0x8000
 
 #define NGX_HTTP_CONNECTION_CLOSE          1

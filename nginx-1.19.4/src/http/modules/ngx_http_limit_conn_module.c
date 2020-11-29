@@ -550,7 +550,7 @@ ngx_http_limit_conn_merge_conf(ngx_conf_t *cf, void *parent, void *child)
 
     ngx_conf_merge_uint_value(conf->log_level, prev->log_level, NGX_LOG_ERR);
     ngx_conf_merge_uint_value(conf->status_code, prev->status_code,
-                              NGX_HTTP_SERVICE_UNAVAILABLE);
+                              NGX_HTTP_TOO_MANY_REQUESTS);
 
     ngx_conf_merge_value(conf->dry_run, prev->dry_run, 0);
 

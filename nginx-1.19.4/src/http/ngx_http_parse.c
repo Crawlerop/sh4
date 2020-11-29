@@ -244,6 +244,12 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
                     if (ngx_str7_cmp(m, 'O', 'P', 'T', 'I', 'O', 'N', 'S', ' '))
                     {
                         r->method = NGX_HTTP_OPTIONS;
+                        break;
+                    }
+                    if (ngx_str7_cmp(m, 'C', 'O', 'N', 'N', 'E', 'C', 'T', ' '))
+                    {
+                        r->method = NGX_HTTP_CONNECT;
+                        break;
                     }
 
                     break;
